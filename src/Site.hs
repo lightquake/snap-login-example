@@ -20,6 +20,7 @@ import           Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Data.Time.Clock
+
 import           Snap.Core
 import           Snap.Snaplet
 import           Snap.Snaplet.Auth hiding (session)
@@ -27,11 +28,12 @@ import           Snap.Snaplet.Auth.Backends.JsonFile
 import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
+
 import           Text.Templating.Heist
 import           Text.XmlHtml hiding (render)
 
 import           Application
-
+import           SLE.Auth
 
 ------------------------------------------------------------------------------
 -- | Renders the front page of the sample site.
@@ -42,10 +44,11 @@ import           Application
 index :: Handler App App ()
 index = ifTop $ render "notLoggedIn"
 
-------------------------------------------------------------------------------
+
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("/",            index)
+routes = [ ("/", index)
+         , ("/register", registerH)
          , ("", with heist heistServe)
          , ("", serveDirectory "resources/static")
          ]
