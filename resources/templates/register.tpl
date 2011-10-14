@@ -1,7 +1,7 @@
 <apply template="default">
   <div class="page-header"><h1>Register</h1></div>
   <div class="row">
-    <form class="form-stacked">
+    <form action="/register" method="POST" class="form-stacked">
       <fieldset>
 	<div class="clearfix">
 	  <label for="username">Username</label>
