@@ -40,10 +40,10 @@ registerForm = Registration
                <*> (B.pack <$> input "password" Nothing `validate` nonEmpty) <++ errors
   where
     nonEmpty :: (Monad m) => Validator m T.Text String
-    nonEmpty = check "Field must not be empty" $ not . null
+    nonEmpty = check "Field must not be empty." $ not . null
 
     notInUse :: Validator (Handler App App) T.Text String
-    notInUse = checkM "User exists" $ liftM not . with auth . userExists . T.pack
+    notInUse = checkM "This username already exists." $ liftM not . with auth . userExists . T.pack
 
 userExists :: T.Text -> Handler b (AuthManager b) Bool
 userExists username = do

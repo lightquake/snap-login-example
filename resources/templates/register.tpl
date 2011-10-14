@@ -6,13 +6,15 @@
 	<div class="clearfix">
 	  <label for="username">Username</label>
 	  <div class="input">
-	    <input name="username" id="username" type="text" />
+	    <input name="username" id="username" type="text" value="$(username-value)" />
+	    <username-errors><span class="help-inline"><error/></span></username-errors>
 	  </div>
 	</div>
 	<div class="clearfix">
 	  <label for="username">Password</label>
 	  <div class="input">
 	    <input name="password" id="password" type="password" />
+	    <password-errors><span class="help-inline"><error/></span></password-errors>
 	  </div>
 	</div>
       </fieldset>
