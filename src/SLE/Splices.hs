@@ -35,7 +35,7 @@ errorBind field = (field <> "-error", splice)
 
 -- The username of the currently logged-in user; evaluates to an empty
 -- node if there is none.
-usernameSplice :: SnapletSplice b (AuthManager b)
+usernameSplice :: SnapletSplice app (AuthManager app)
 usernameSplice = do
   user <- liftHandler currentUser
   maybe (return []) (liftHeist . textSplice . userLogin) user

@@ -63,7 +63,7 @@ loginForm = loginByUsername
     nonEmpty = check "Field must not be empty." $ not . null
 
 
-userExists :: T.Text -> Handler b (AuthManager b) Bool
+userExists :: T.Text -> Handler app (AuthManager app) Bool
 userExists username = do
   (AuthManager r _ _ _ _ _ _ _) <- get
   liftIO $ isJust <$> lookupByLogin r username
