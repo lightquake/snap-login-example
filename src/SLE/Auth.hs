@@ -17,6 +17,7 @@ import           Control.Monad.Trans
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 import           Data.Maybe (isJust)
+import           Data.Monoid
 import qualified Data.Text as T
 
 import           Snap.Core
@@ -26,10 +27,14 @@ import           Snap.Snaplet.Heist
 
 import           Text.Digestive.Snap.Heist
 import           Text.Digestive
+import           Text.Templating.Heist
+import           Text.XmlHtml as X
 
 import           Application (App, auth)
+import           SLE.Splices (errorBind)
 
 data Registration = Registration T.Text ByteString deriving (Eq, Show)
+
 
 ------------------------------------------------------------------------------
 -- | Auth-related forms.
@@ -59,8 +64,10 @@ registerH = do
   result <- eitherSnapForm registerForm "registerForm"
   case result of
     -- we errored; splices is the list of error splices
-    Left splices ->
-      renderWithSplices "register" $ map (second liftHeist) splices
+    Left splices -> do
+      -- bind error splices in so the elements that errored have the error class
+      let splices' = splices ++ map errorBind ["username", "password"]
+      renderWithSplices "register" $ map (second liftHeist) splices'
     -- we succeeded and got a registration to process
     Right (Registration username password) -> do
       with auth $ createUser username password >>= forceLogin
