@@ -11,8 +11,8 @@ import           Data.Monoid        (mappend)
 import qualified Data.Text as T
 
 import           Snap.Snaplet       (withTop)
-import           Snap.Snaplet.Auth  (currentUser, userLogin)
-import           Snap.Snaplet.Heist (liftHandler, liftHeist)
+import           Snap.Snaplet.Auth
+import           Snap.Snaplet.Heist
 
 import           Text.Templating.Heist
 import qualified Text.XmlHtml as X
@@ -33,8 +33,9 @@ errorBind field = (field <> "-error", splice)
             _  -> textSplice " error"
 
 -- The username of the currently logged-in user.
-usernameSplice auth = do
-  user <- liftHandler $ withTop auth currentUser
+usernameSplice :: SnapletSplice b (AuthManager b)
+usernameSplice = do
+  user <- liftHandler currentUser
   maybe (return []) (liftHeist . textSplice . userLogin) user
 
 (<>) = mappend

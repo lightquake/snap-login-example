@@ -42,13 +42,13 @@ import           SLE.Splices
 -- The 'ifTop' is required to limit this to the top of a route.
 -- Otherwise, the way the route table is currently set up, this action
 -- would be given every request.
-index :: Handler App App ()
-index = ifTop $ renderWithSplices "index" [("username", usernameSplice auth)]
+index :: Handler App (AuthManager App) ()
+index = ifTop $ renderWithSplices "index" [("username", usernameSplice)]
 
 
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("/", index)
+routes = [ ("/", with auth index)
          , ("/register", registerH)
          , ("", with heist heistServe)
          , ("", serveDirectory "resources/static")
