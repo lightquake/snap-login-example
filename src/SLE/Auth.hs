@@ -57,7 +57,7 @@ loginForm :: SnapForm (Handler App App) T.Text HeistView (Handler b (AuthManager
 loginForm = loginByUsername
                <$> (B.pack <$> input "username" Nothing `validate` nonEmpty) <++ errors
                <*> (ClearText . B.pack <$> input "password" Nothing `validate` nonEmpty) <++ errors
-               <*> pure False
+               <*> pure False -- this indicates not to create a remember token
   where
     nonEmpty :: (Monad m) => Validator m T.Text String
     nonEmpty = check "Field must not be empty." $ not . null
@@ -87,7 +87,7 @@ registerH = do
       redirect "/"
 
 loginH :: Handler App App ()
-loginH = do
+loginH = withSplices [blankBind] $ do
   -- run the login form
   result <- eitherSnapForm loginForm "loginForm"
   case result of
@@ -99,4 +99,10 @@ loginH = do
     -- login fails. only redirect to / if login succeeded.
     Right result -> do
       r <- with auth result
-      either (const $ render "login") (const $ redirect "/") r
+      case r of
+        Left failure ->
+          withSplices [failureBind] $ render "login"
+        Right success ->
+          redirect "/"
+  where failureBind = ("auth-error", liftHeist runChildren)
+        blankBind = ("auth-error", liftHeist $ return [X.TextNode ""])

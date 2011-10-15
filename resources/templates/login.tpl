@@ -1,7 +1,13 @@
 <apply template="default">
   <div class="page-header"><h1>Log in</h1></div>
   <div class="row">
+    <auth-error>
+      <div class="alert-message error">Username and/or password invalid.</div>
+    </auth-error>
+  </div>
+  <div class="row">
     <form action="/login" method="POST" class="form-stacked">
+
       <fieldset>
 	<div class="clearfix$(username-error)">
 	  <label for="username">Username</label>
