@@ -3,11 +3,16 @@
 {-| Various splices that SLE uses. -}
 
 module SLE.Splices 
-       ( errorBind )
+       ( errorBind 
+       , usernameSplice )
 where
   
-import           Data.Monoid (mappend)
+import           Data.Monoid        (mappend)
 import qualified Data.Text as T
+
+import           Snap.Snaplet       (withTop)
+import           Snap.Snaplet.Auth  (currentUser, userLogin)
+import           Snap.Snaplet.Heist (liftHandler, liftHeist)
 
 import           Text.Templating.Heist
 import qualified Text.XmlHtml as X
@@ -25,6 +30,11 @@ errorBind field = (field <> "-error", splice)
           errorList <- runNodeList [node]
           case errorList of
             [] -> textSplice ""
-            otherwise -> textSplice " error"
-            
+            _  -> textSplice " error"
+
+-- The username of the currently logged-in user.
+usernameSplice auth = do
+  user <- liftHandler $ withTop auth currentUser
+  maybe (return []) (liftHeist . textSplice . userLogin) user
+
 (<>) = mappend

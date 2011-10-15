@@ -34,6 +34,7 @@ import           Text.XmlHtml hiding (render)
 
 import           Application
 import           SLE.Auth
+import           SLE.Splices
 
 ------------------------------------------------------------------------------
 -- | Renders the front page of the sample site.
@@ -42,7 +43,7 @@ import           SLE.Auth
 -- Otherwise, the way the route table is currently set up, this action
 -- would be given every request.
 index :: Handler App App ()
-index = ifTop $ render "notLoggedIn"
+index = ifTop $ renderWithSplices "index" [("username", usernameSplice auth)]
 
 
 -- | The application's routes.
@@ -61,6 +62,7 @@ app = makeSnaplet "app" "A snaplet example application." Nothing $ do
     am <- nestSnaplet "authmanager" auth $ initJsonFileAuthManager defAuthSettings session "user.json"
     sm <- nestSnaplet "sessionmanager" session $ initCookieSessionManager "site_key.txt" "_cookie" Nothing
     addRoutes routes
+    addAuthSplices auth
     return $ App h am sm
 
 
