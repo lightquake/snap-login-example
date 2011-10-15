@@ -91,18 +91,24 @@ loginH = withSplices [blankBind] $ do
   -- run the login form
   result <- eitherSnapForm loginForm "loginForm"
   case result of
-    -- use the list of error splices to render the login form
     Left splices -> do
+      -- use the list of error splices to render the login form, which
+      -- had a validation error.
       let splices' = splices ++ map errorBind ["username", "password"]
       renderWithSplices "login" $ map (second liftHeist) splices'
-    -- the values were valid, but we still might redirect back if
-    -- login fails. only redirect to / if login succeeded.
     Right result -> do
+      -- the values were valid, but we still might redirect back if
+      -- login fails (Left case). only redirect to / if login succeeded
+      -- (Right case).
       r <- with auth result
       case r of
         Left failure ->
           withSplices [failureBind] $ render "login"
         Right success ->
           redirect "/"
-  where failureBind = ("auth-error", liftHeist runChildren)
-        blankBind = ("auth-error", liftHeist $ return [X.TextNode ""])
+  where 
+    -- since binds are applied in reverse order, we apply blankBlind
+    -- globally and then failureBind in the case where we have an
+    -- actual login failure.
+    failureBind = ("auth-error", liftHeist runChildren)
+    blankBind = ("auth-error", return [X.TextNode ""])
