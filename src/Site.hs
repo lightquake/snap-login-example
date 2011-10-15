@@ -50,6 +50,7 @@ index = ifTop $ renderWithSplices "index" [("username", usernameSplice)]
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("/", with auth index)
          , ("/register", registerH)
+           , ("/login", loginH)
          , ("/logout", with auth logout >> redirect "/")
          , ("", with heist heistServe)
          , ("", serveDirectory "resources/static")
