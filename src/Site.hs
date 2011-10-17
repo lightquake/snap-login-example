@@ -21,10 +21,13 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Data.Time.Clock
 
+import           Database.HDBC.Sqlite3
+
 import           Snap.Core
 import           Snap.Snaplet
 import           Snap.Snaplet.Auth hiding (session)
 import           Snap.Snaplet.Auth.Backends.JsonFile
+import           Snap.Snaplet.Hdbc
 import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
@@ -47,10 +50,10 @@ index = ifTop $ renderWithSplices "index" [("username", usernameSplice)]
 
 
 -- | The application's routes.
-routes :: [(ByteString, Handler App App ())]
+routes :: [(ByteString, AppHandler ())]
 routes = [ ("/", with auth index)
          , ("/register", registerH)
-           , ("/login", loginH)
+         , ("/login", loginH)
          , ("/logout", with auth logout >> redirect "/")
          , ("", with heist heistServe)
          , ("", serveDirectory "resources/static")
@@ -63,8 +66,7 @@ app = makeSnaplet "app" "A snaplet example application." Nothing $ do
     h <- nestSnaplet "heist" heist $ heistInit "resources/templates"
     am <- nestSnaplet "authmanager" auth $ initJsonFileAuthManager defAuthSettings session "user.json"
     sm <- nestSnaplet "sessionmanager" session $ initCookieSessionManager "site_key.txt" "_cookie" Nothing
+    conn <- nestSnaplet "hdbc" hdbc $ hdbcInit $ connectSqlite3 "data.db"
     addRoutes routes
     addAuthSplices auth
-    return $ App h am sm
-
-
+    return $ App h am sm conn

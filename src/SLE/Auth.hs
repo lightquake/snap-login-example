@@ -31,7 +31,7 @@ import           Text.Digestive
 import           Text.Templating.Heist
 import qualified Text.XmlHtml as X
 
-import           Application (App, auth)
+import           Application (App, AppHandler, auth)
 import           SLE.Splices (errorBind)
 
 data Registration = Registration T.Text ByteString deriving (Eq, Show)
@@ -40,7 +40,7 @@ data Registration = Registration T.Text ByteString deriving (Eq, Show)
 ------------------------------------------------------------------------------
 -- | Auth-related forms.
 
-registerForm :: SnapForm (Handler App App) T.Text HeistView Registration
+registerForm :: SnapForm (AppHandler) T.Text HeistView Registration
 registerForm = Registration
                <$> (T.pack <$> input "username" Nothing `validateMany` [nonEmpty, notInUse]) <++ errors
                <*> (B.pack <$> input "password" Nothing `validate` nonEmpty) <++ errors
@@ -49,11 +49,11 @@ registerForm = Registration
     nonEmpty :: (Monad m) => Validator m T.Text String
     nonEmpty = check "Field must not be empty." $ not . null
 
-    notInUse :: Validator (Handler App App) T.Text String
+    notInUse :: Validator AppHandler T.Text String
     notInUse = checkM "This username already exists." $ liftM not . with auth . userExists . T.pack
 
 
-loginForm :: SnapForm (Handler App App) T.Text HeistView (Handler b (AuthManager b) (Either AuthFailure AuthUser))
+loginForm :: SnapForm AppHandler T.Text HeistView (Handler b (AuthManager b) (Either AuthFailure AuthUser))
 loginForm = loginByUsername
                <$> (B.pack <$> input "username" Nothing `validate` nonEmpty) <++ errors
                <*> (ClearText . B.pack <$> input "password" Nothing `validate` nonEmpty) <++ errors
@@ -71,7 +71,7 @@ userExists username = do
 ------------------------------------------------------------------------------
 -- | Auth-related handlers.
 
-registerH :: Handler App App ()
+registerH :: AppHandler ()
 registerH = do
   -- run the registerForm
   result <- eitherSnapForm registerForm "registerForm"
@@ -86,7 +86,7 @@ registerH = do
       with auth $ createUser username password >>= forceLogin
       redirect "/"
 
-loginH :: Handler App App ()
+loginH :: AppHandler ()
 loginH = withSplices [blankBind] $ do
   -- run the login form
   result <- eitherSnapForm loginForm "loginForm"
