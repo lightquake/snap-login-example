@@ -50,7 +50,7 @@ the GHC API (via the hint library).
 
 Third, and the reason you would ever want to actually compile with
 development mode, is that it enables a faster development cycle. You
-can simply edit a file, save your changes, and hit reload to see your
+2can simply edit a file, save your changes, and hit reload to see your
 changes reflected immediately.
 
 When this is compiled without the development flag, all the actions

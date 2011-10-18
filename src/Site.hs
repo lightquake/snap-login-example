@@ -46,10 +46,21 @@ import           SLE.Splices
 -- Otherwise, the way the route table is currently set up, this action
 -- would be given every request.
 index :: Handler App (AuthManager App) ()
-index = ifTop $ renderWithSplices "index" [
-    ("username", usernameSplice), ("message", messageSplice Nothing)
-    ]
-
+index = do
+  message <- msgSplice
+  ifTop $ renderWithSplices "index" $ [("username", usernameSplice), ("message", message)]
+        
+msgSplice :: Handler App (AuthManager App) (SnapletSplice b v)
+msgSplice = do
+  user <- currentUser
+  case user of
+    Nothing -> return . liftHeist $ runChildren
+    Just u -> do
+      s <- messageSplice u
+      return . liftHeist $ case s of
+        Nothing -> textSplice $ "not set"
+        Just s' -> s'
+    
 
 -- | The application's routes.
 routes :: [(ByteString, AppHandler ())]

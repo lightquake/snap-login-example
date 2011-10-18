@@ -1,6 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TemplateHaskell, TypeSynonymInstances, MultiParamTypeClasses, FlexibleInstances #-}
 
 {-
 
@@ -35,6 +33,8 @@ data App = App
 
 makeLens ''App
 
+instance HasHdbc (Handler App subapp) Connection where
+  getPool = withTop hdbc $ gets hdbcPool
 
 type AppHandler = Handler App App
 
