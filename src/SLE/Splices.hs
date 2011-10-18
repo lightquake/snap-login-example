@@ -1,14 +1,17 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ViewPatterns #-}
 
 {-| Various splices that SLE uses. -}
 
 module SLE.Splices 
        ( errorBind 
-       , usernameSplice )
+       , usernameSplice
+       , messageSplice )
 where
   
 import           Data.Monoid        (mappend)
 import qualified Data.Text as T
+
+import           SLE.Model
 
 import           Snap.Snaplet       (withTop)
 import           Snap.Snaplet.Auth
@@ -39,6 +42,15 @@ usernameSplice :: SnapletSplice app (AuthManager app)
 usernameSplice = do
   user <- liftHandler currentUser
   maybe (return []) (liftHeist . textSplice . userLogin) user
+
+-- The message a certain user has stored. Takes the user as a
+-- parameter so that we can look at other users' splices.
+messageSplice :: Maybe AuthUser -> SnapletSplice app (AuthManager app)
+messageSplice Nothing = do
+ user <- liftHandler currentUser
+ maybe (return []) (messageSplice . Just) user
+messageSplice (Just (getMessage -> Nothing)) = return [X.TextNode "not set"]
+messageSplice (Just (getMessage -> Just msg) )= return [X.TextNode $ "\"" <> msg <> "\""]
 
 -- Text is a Monoid, so we can use <> to concat them as opposed to `T.append`.
 (<>) = mappend

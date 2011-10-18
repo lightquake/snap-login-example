@@ -46,7 +46,9 @@ import           SLE.Splices
 -- Otherwise, the way the route table is currently set up, this action
 -- would be given every request.
 index :: Handler App (AuthManager App) ()
-index = ifTop $ renderWithSplices "index" [("username", usernameSplice)]
+index = ifTop $ renderWithSplices "index" [
+    ("username", usernameSplice), ("message", messageSplice Nothing)
+    ]
 
 
 -- | The application's routes.
