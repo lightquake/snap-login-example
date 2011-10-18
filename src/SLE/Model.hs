@@ -18,6 +18,7 @@ getMessage (userId -> Just uid) = do
   results <- quickQuery "select message from messages where userid = ?" [toSql . unUid $ uid]
   return $ if null results then Nothing else Just . fromSql $ head . head $ results
 
+setMessage :: HasHdbc m c => AuthUser -> T.Text -> m ()
 setMessage (userId -> Nothing) _ = return ()
 setMessage (userId -> Just uid) message = do
   quickQuery "delete from messages where userid = ?" [uid']

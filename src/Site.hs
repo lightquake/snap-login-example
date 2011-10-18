@@ -59,7 +59,8 @@ indexPOST :: Handler App (AuthManager App) ()
 indexPOST = do
   message <- getParam "message"
   user <- currentUser
-  when (isJust message) $ (withCurrentUser_ $ flip setMessage message)
+  when (isJust message) . withCurrentUser_ . flip setMessage
+    . T.decodeUtf8 . fromJust $ message
   redirect "/"
   
 index = method GET indexGET <|> method POST indexPOST
