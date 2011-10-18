@@ -7,7 +7,8 @@
 module SLE.Auth
        ( Registration
        , registerH
-       , loginH )
+       , loginH
+       , withCurrentUser)
 where
 
 import           Control.Applicative
@@ -62,12 +63,6 @@ loginForm = loginByUsername
     nonEmpty :: (Monad m) => Validator m T.Text String
     nonEmpty = check "Field must not be empty." $ not . null
 
-
-userExists :: T.Text -> Handler app (AuthManager app) Bool
-userExists username = do
-  (AuthManager r _ _ _ _ _ _ _) <- get
-  liftIO $ isJust <$> lookupByLogin r username
-
 ------------------------------------------------------------------------------
 -- | Auth-related handlers.
 
@@ -112,3 +107,20 @@ loginH = withSplices [blankBind] $ do
     -- actual login failure.
     failureBind = ("auth-error", liftHeist runChildren)
     blankBind = ("auth-error", return [X.TextNode ""])
+    
+--------------------------------------------------------------------------------
+-- | Convenience functions.
+
+
+userExists :: T.Text -> Handler app (AuthManager app) Bool
+userExists username = do
+  (AuthManager r _ _ _ _ _ _ _) <- get
+  liftIO $ isJust <$> lookupByLogin r username
+
+
+-- Run some computation with the current user; evalates to Nothing if
+-- there is no current user.
+withCurrentUser :: (AuthUser -> Handler app (AuthManager app) value) -> Handler app (AuthManager app) (Maybe value)
+withCurrentUser f = do
+  user <- currentUser
+  maybe (return Nothing) ((Just <$>) . f) user

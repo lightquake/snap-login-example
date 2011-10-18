@@ -47,21 +47,13 @@ import           SLE.Splices
 -- would be given every request.
 index :: Handler App (AuthManager App) ()
 index = do
-  message <- msgSplice
+  -- maybe get the splice that holds the user's message
+  splice <- join <$> withCurrentUser messageSplice
+  -- if we got it, splice it in. otherwise add 'not found'.
+  let message = liftHeist $ fromMaybe (textSplice "not found") splice
   ifTop $ renderWithSplices "index" $ [("username", usernameSplice), ("message", message)]
-        
-msgSplice :: Handler App (AuthManager App) (SnapletSplice b v)
-msgSplice = do
-  user <- currentUser
-  case user of
-    Nothing -> return . liftHeist $ runChildren
-    Just u -> do
-      s <- messageSplice u
-      return . liftHeist $ case s of
-        Nothing -> textSplice $ "not set"
-        Just s' -> s'
-    
 
+-----------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, AppHandler ())]
 routes = [ ("/", with auth index)
