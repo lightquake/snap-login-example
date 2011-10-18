@@ -37,6 +37,7 @@ import           Text.XmlHtml hiding (render)
 
 import           Application
 import           SLE.Auth
+import           SLE.Model
 import           SLE.Splices
 
 ------------------------------------------------------------------------------
@@ -45,13 +46,23 @@ import           SLE.Splices
 -- The 'ifTop' is required to limit this to the top of a route.
 -- Otherwise, the way the route table is currently set up, this action
 -- would be given every request.
-index :: Handler App (AuthManager App) ()
-index = do
+indexGET :: Handler App (AuthManager App) ()
+indexGET = do
   -- maybe get the splice that holds the user's message
   splice <- join <$> withCurrentUser messageSplice
   -- if we got it, splice it in. otherwise add 'not found'.
   let message = liftHeist $ fromMaybe (textSplice "not found") splice
   ifTop $ renderWithSplices "index" $ [("username", usernameSplice), ("message", message)]
+
+-- | Handle POSTing to the index page; i.e., setting the message.
+indexPOST :: Handler App (AuthManager App) ()
+indexPOST = do
+  message <- getParam "message"
+  user <- currentUser
+  when (isJust message) $ (withCurrentUser_ $ flip setMessage message)
+  redirect "/"
+  
+index = method GET indexGET <|> method POST indexPOST
 
 -----------------------------------------------------------------------------
 -- | The application's routes.

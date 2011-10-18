@@ -5,6 +5,10 @@
   </ifLoggedOut>
   <ifLoggedIn>
     <div class="page-header"><h1>Hello, <username/></h1></div>
-    Your message is <message/>.
+    <p>Your message is <message/>.</p>
+    <form method="post" action="/">
+      <input type="text" name="message" id="message"/>
+	<button type="submit" class="btn">Set message</button>
+    </form>
   </ifLoggedIn>
 </apply>

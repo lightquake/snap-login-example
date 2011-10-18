@@ -8,7 +8,8 @@ module SLE.Auth
        ( Registration
        , registerH
        , loginH
-       , withCurrentUser)
+       , withCurrentUser
+       , withCurrentUser_ )
 where
 
 import           Control.Applicative
@@ -124,3 +125,6 @@ withCurrentUser :: (AuthUser -> Handler app (AuthManager app) value) -> Handler 
 withCurrentUser f = do
   user <- currentUser
   maybe (return Nothing) ((Just <$>) . f) user
+
+-- Like withCurrentUser, but discards the result.
+withCurrentUser_ f = withCurrentUser f >> return ()
