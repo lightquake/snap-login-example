@@ -6,7 +6,6 @@ module SLE.Model
 where
 
 import qualified Data.Text as T
-import Data.Text.Encoding
 
 import Snap.Snaplet.Auth
 import Snap.Snaplet.Hdbc

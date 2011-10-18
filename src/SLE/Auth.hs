@@ -16,11 +16,9 @@ import           Control.Applicative
 import           Control.Arrow (second)
 import           Control.Monad
 import           Control.Monad.State
-import           Control.Monad.Trans
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 import           Data.Maybe (isJust)
-import           Data.Monoid
 import qualified Data.Text as T
 
 import           Snap.Core
@@ -33,7 +31,7 @@ import           Text.Digestive
 import           Text.Templating.Heist
 import qualified Text.XmlHtml as X
 
-import           Application (App, AppHandler, auth)
+import           Application (AppHandler, auth)
 import           SLE.Splices (errorBind)
 
 data Registration = Registration T.Text ByteString deriving (Eq, Show)
@@ -42,7 +40,7 @@ data Registration = Registration T.Text ByteString deriving (Eq, Show)
 ------------------------------------------------------------------------------
 -- | Auth-related forms.
 
-registerForm :: SnapForm (AppHandler) T.Text HeistView Registration
+registerForm :: SnapForm AppHandler T.Text HeistView Registration
 registerForm = Registration
                <$> (T.pack <$> input "username" Nothing `validateMany` [nonEmpty, notInUse]) <++ errors
                <*> (B.pack <$> input "password" Nothing `validate` nonEmpty) <++ errors
@@ -98,9 +96,9 @@ loginH = withSplices [blankBind] $ do
       -- (Right case).
       r <- with auth result
       case r of
-        Left failure ->
+        Left _ ->
           withSplices [failureBind] $ render "login"
-        Right success ->
+        Right _ ->
           redirect "/"
   where 
     -- since binds are applied in reverse order, we apply blankBlind
@@ -127,4 +125,5 @@ withCurrentUser f = do
   maybe (return Nothing) ((Just <$>) . f) user
 
 -- Like withCurrentUser, but discards the result.
+withCurrentUser_ :: (AuthUser -> Handler app (AuthManager app) value) -> Handler app (AuthManager app) ()
 withCurrentUser_ f = withCurrentUser f >> return ()

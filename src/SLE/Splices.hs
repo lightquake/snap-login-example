@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, ViewPatterns #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-| Various splices that SLE uses. -}
 
@@ -9,12 +9,11 @@ module SLE.Splices
 where
   
 import           Control.Applicative
-import           Data.Monoid        (mappend)
+import           Data.Monoid        (Monoid, mappend)
 import qualified Data.Text as T
 
 import           SLE.Model
 
-import           Snap.Snaplet       (withTop)
 import           Snap.Snaplet.Auth
 import           Snap.Snaplet.Hdbc
 import           Snap.Snaplet.Heist
@@ -53,4 +52,5 @@ messageSplice user = do
   return $ textSplice . (\x -> "\"" <> x <> "\"") <$> msg
 
 -- Text is a Monoid, so we can use <> to concat them as opposed to `T.append`.
+(<>) :: (Monoid a) => a -> a -> a
 (<>) = mappend

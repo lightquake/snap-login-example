@@ -13,13 +13,10 @@ module Site
   ) where
 
 import           Control.Applicative
-import           Control.Monad.Trans
 import           Control.Monad.State
 import           Data.ByteString (ByteString)
 import           Data.Maybe
-import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import           Data.Time.Clock
 
 import           Database.HDBC.Sqlite3
 
@@ -33,7 +30,6 @@ import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
 
 import           Text.Templating.Heist
-import           Text.XmlHtml hiding (render)
 
 import           Application
 import           SLE.Auth
@@ -52,17 +48,17 @@ indexGET = do
   splice <- join <$> withCurrentUser messageSplice
   -- if we got it, splice it in. otherwise add 'not found'.
   let message = liftHeist $ fromMaybe (textSplice "not found") splice
-  ifTop $ renderWithSplices "index" $ [("username", usernameSplice), ("message", message)]
+  ifTop $ renderWithSplices "index" [("username", usernameSplice), ("message", message)]
 
 -- | Handle POSTing to the index page; i.e., setting the message.
 indexPOST :: Handler App (AuthManager App) ()
 indexPOST = do
   message <- getParam "message"
-  user <- currentUser
   when (isJust message) . withCurrentUser_ . flip setMessage
     . T.decodeUtf8 . fromJust $ message
   redirect "/"
   
+index :: Handler App (AuthManager App) ()
 index = method GET indexGET <|> method POST indexPOST
 
 -----------------------------------------------------------------------------

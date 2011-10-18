@@ -10,12 +10,10 @@ monad.
 module Application where
 
 import Control.Monad.State
-import Control.Monad.IO.Control
 
 import Database.HDBC.Sqlite3
 
 import Data.Lens.Template
-import Data.Time.Clock
 
 import Snap.Snaplet
 import Snap.Snaplet.Auth
