@@ -25,8 +25,8 @@ import           Snap.Snaplet
 import           Snap.Snaplet.Auth hiding (session)
 import           Snap.Snaplet.Auth.Backends.JsonFile
 import           Snap.Snaplet.Hdbc
-import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Snaplet.Heist
+import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
 
 import           Text.Templating.Heist
@@ -82,4 +82,5 @@ app = makeSnaplet "app" "A snaplet example application." Nothing $ do
     conn <- nestSnaplet "hdbc" hdbc $ hdbcInit $ connectSqlite3 "data.db"
     addRoutes routes
     addAuthSplices auth
+    wrapHandlers (<|> with hdbc initializeModel)
     return $ App h am sm conn

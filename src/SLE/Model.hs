@@ -2,7 +2,8 @@
 
 module SLE.Model 
        ( getMessage 
-       , setMessage )
+       , setMessage 
+       , initializeModel )
 where
 
 import qualified Data.Text as T
@@ -17,6 +18,7 @@ getMessage (userId -> Just uid) = do
   results <- quickQuery "select message from messages where userid = ?" [toSql . unUid $ uid]
   return $ if null results then Nothing else Just . fromSql $ head . head $ results
 
+-- Set the message for the given user.
 setMessage :: HasHdbc m c => AuthUser -> T.Text -> m ()
 setMessage (userId -> Nothing) _ = return ()
 setMessage (userId -> Just uid) message = do
@@ -25,3 +27,8 @@ setMessage (userId -> Just uid) message = do
   commit
   where uid' = toSql . unUid $ uid
   
+-- Create the SQL table to hold the model
+initializeModel :: HasHdbc m c => m ()
+initializeModel = do 
+  quickQuery "create table if not exists messages (userid int primary key, message text)" []
+  commit
